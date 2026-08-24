@@ -26,7 +26,7 @@ hr.div{border:none;border-top:1px solid var(--border);flex-shrink:0;margin:0;}
 .chip{background:rgba(242,239,232,0.04);border:1px solid var(--border);border-radius:20px;padding:7px 13px;font-size:12px;color:var(--muted);cursor:pointer;white-space:nowrap;}
 .chip.sel{border-color:var(--white);background:rgba(242,239,232,0.12);color:var(--white);}
 
-.cust-input{width:100%;background:rgba(242,239,232,0.07);border:1px solid var(--border);border-radius:6px;padding:9px 10px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--white);outline:none;-webkit-appearance:none;}
+.cust-input{width:100%;background:rgba(242,239,232,0.07);border:1px solid var(--border);border-radius:6px;padding:9px 10px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--white);outline:none;-webkit-appearance:none;margin-bottom:8px;}
 .cust-input::placeholder{color:var(--muted);}
 .cust-input:focus{border-color:rgba(242,239,232,0.4);}
 
@@ -37,7 +37,7 @@ hr.div{border:none;border-top:1px solid var(--border);flex-shrink:0;margin:0;}
 .frag-btn.sel{border-color:var(--white);background:rgba(242,239,232,0.12);}
 .frag-btn.sel .frag-lbl{color:var(--white);}
 
-.stepper{display:flex;align-items:center;gap:10px;}
+.stepper{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
 .stepper button{width:32px;height:32px;border-radius:6px;border:1px solid var(--border);background:rgba(242,239,232,0.06);color:var(--white);font-size:17px;line-height:1;cursor:pointer;}
 .stepper input{flex:1;text-align:center;background:rgba(242,239,232,0.04);border:1px solid var(--border);border-radius:6px;padding:8px;color:var(--white);font-family:'Bebas Neue',sans-serif;font-size:18px;outline:none;-moz-appearance:textfield;}
 .stepper input::-webkit-outer-spin-button,.stepper input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
@@ -46,7 +46,7 @@ hr.div{border:none;border-top:1px solid var(--border);flex-shrink:0;margin:0;}
 .action-tab{background:rgba(242,239,232,0.04);border:1px solid var(--border);border-radius:20px;padding:8px 13px;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:0.04em;color:var(--muted);cursor:pointer;white-space:nowrap;flex-shrink:0;}
 .action-tab.active{border-color:var(--white);background:rgba(242,239,232,0.12);color:var(--white);}
 
-.panel{display:none;flex-direction:column;gap:10px;border:1px solid var(--border);border-radius:10px;padding:12px;flex-shrink:0;}
+.panel{display:none;flex-direction:column;gap:2px;border:1px solid var(--border);border-radius:10px;padding:12px;flex-shrink:0;}
 .panel.active{display:flex;}
 
 #submitBtn{width:100%;background:var(--white);color:var(--black);border:none;padding:13px;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:0.08em;border-radius:4px;cursor:pointer;flex-shrink:0;}
@@ -91,6 +91,7 @@ th{color:var(--muted);font-weight:500;font-size:10px;text-transform:uppercase;}
     <button class="ov-close" onclick="closeUserOverlay()">✕ Close</button>
   </div>
   <hr class="div">
+  <div class="status-bar dim">Tap your name, then enter your PIN.</div>
   <div id="userList"><div class="status-bar dim">Loading…</div></div>
 </div>
 
@@ -114,18 +115,6 @@ th{color:var(--muted);font-weight:500;font-size:10px;text-transform:uppercase;}
     </div>
   </div>
   <hr class="div">
-
-  <span class="sl">Location</span>
-  <div class="chip-row" id="locTypeRow">
-    <div class="chip" data-val="warehouse" onclick="pickLocType(this)">Warehouse</div>
-    <div class="chip" data-val="event" onclick="pickLocType(this)">Fest / event</div>
-  </div>
-  <input id="warehouseInput" class="cust-input" type="text" placeholder="Type warehouse name" style="display:none;" oninput="onWarehouseLocChange()">
-  <div class="chip-row" id="warehouseSuggestChips" style="display:none;"></div>
-  <input id="eventIdInput" class="cust-input" type="text" placeholder="Event ID e.g. FEST-2026-08-22-Andheri" style="display:none;" oninput="onLocationValueChange()">
-  <div class="status-bar dim" id="locStatus">Pick a location before doing anything</div>
-
-  <hr class="div">
   <div class="action-tabs" id="actionTabs"></div>
   <div id="panels"></div>
   <button id="submitBtn" disabled onclick="submitCurrentAction()">Submit</button>
@@ -133,316 +122,57 @@ th{color:var(--muted);font-weight:500;font-size:10px;text-transform:uppercase;}
 </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbycJhj7zs2YyPQ9USd3rMvNWH2LZFNMl4bbJ01uUv2T2GKD1KM0HFW9jysdLGkVxEcXtg/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbya3DCbhegmcoOLEMIPHIRTrEDAVSSOjATtT0IIqCFigYUAM7NZ7paUxWLnlMdSLcN7xw/exec';
 
 const SCENTS = ['Skinny Dip','Midnight Snack','About Last Night','Freshly Picked','Still Not Over It'];
 const SCENT_COLORS = {
   'Skinny Dip':'#5B7FB5','Midnight Snack':'#5A2510','About Last Night':'#8A9E72',
   'Freshly Picked':'#C8B89A','Still Not Over It':'#6B1E24'
 };
-let WAREHOUSE_SUGGESTIONS = []; // loaded from the warehouses sheet — see loadWarehouseSuggestions()
+let WAREHOUSE_SUGGESTIONS = []; // loaded from the warehouses sheet
 
 const USER_KEY = 'ocd_inv_user';
 const PENDING_KEY = 'ocd_inv_pending';
 
 let currentUser = null;
-let locType = null;
-let locValue = null;
 let currentAction = null;
+let carts = {}; // per action-key cart of lines, for cart-based actions
 
+// ═══════════════════════════════════════════════════════
+//  ACTIONS — single source of truth for every tab.
+//  locMode: 'warehouseOnly' | 'warehouseAndEvent' | 'twoWarehouses' | 'generic'
+//    'generic' = one self-contained Warehouse-or-Event picker inside the panel.
+//  skus: if present, this tab is a multi-line CART (add several SKUs, one submit).
+//  simple / special: single-form tabs (not carts).
+// ═══════════════════════════════════════════════════════
 const ACTIONS = {
-  opening:  { label:'Opening stock',apiAction:'setOpeningStock',    needsSku:true,  needsWarehouseOnly:true, needsTargetQty:true },
-  receive:  { label:'Receive',      apiAction:'receiveProcurement', needsSku:true,  needsWarehouseOnly:true, needsQty:true },
-  transfer: { label:'Transfer',     apiAction:'internalTransfer',   needsSku:true,  needsTwoWarehouses:true, needsQty:true },
-  outward:  { label:'Outward',      apiAction:'outwardToFest',      needsSku:true,  needsWarehouseAndEvent:true, needsQty:true },
-  inward:   { label:'Inward',       apiAction:'inwardFromFest',     needsSku:true,  needsWarehouseAndEvent:true, needsQty:true },
-  breakSet: { label:'Break set',    apiAction:'breakSet',           needsSetQC:true },
-  giveFree: { label:'Give free',    apiAction:'giveVialFree',       needsScent:true, needsQty:true },
-  writeOff: { label:'Write off',    apiAction:'writeOffVial',       needsScent:true, needsQty:true, needsReason:true },
-  reassemble:{label:'Reassemble',   apiAction:'reassembleKit',      needsQty:true },
-  bookPool: { label:'Book pool',    apiAction:'bookPoolAsKitSale',  needsDsPrice:true },
+  sale:      { label:'Sale',          apiAction:'bulkSale',               locMode:'generic',          skus:['DS','50ML','VIAL'], valueKey:'qty', hasAmount:true },
+  receive:   { label:'Receive',       apiAction:'bulkReceiveProcurement', locMode:'warehouseOnly',     skus:['DS','50ML'], valueKey:'qty' },
+  opening:   { label:'Opening stock', apiAction:'bulkSetOpeningStock',    locMode:'warehouseOnly',     skus:['DS','50ML'], valueKey:'targetQty', valueLabel:'Actual qty on hand' },
+  transfer:  { label:'Transfer',      apiAction:'bulkInternalTransfer',   locMode:'twoWarehouses',     skus:['DS','50ML'], valueKey:'qty' },
+  outward:   { label:'Outward',       apiAction:'bulkOutwardToFest',      locMode:'warehouseAndEvent', skus:['DS','50ML'], valueKey:'qty' },
+  inward:    { label:'Inward',        apiAction:'bulkInwardFromFest',     locMode:'warehouseAndEvent', skus:['DS','50ML'], valueKey:'qty' },
+  breakSet:  { label:'Break set',     apiAction:'breakSet',               locMode:'generic',           special:'setQC' },
+  giveFree:  { label:'Give free',     apiAction:'giveVialFree',           locMode:'generic',           simple:true, needsScent:true, needsQty:true },
+  writeOff:  { label:'Write off',     apiAction:'writeOffVial',           locMode:'generic',           simple:true, needsScent:true, needsQty:true, needsReason:true },
+  reassemble:{ label:'Reassemble',    apiAction:'reassembleKit',          locMode:'generic',           simple:true, needsQty:true },
+  bookPool:  { label:'Book pool',     apiAction:'bookPoolAsKitSale',      locMode:'generic',           simple:true, needsDsPrice:true },
 };
-// 'sale' is a custom tab (cart-based), handled outside ACTIONS/buildPanel — see Sale section below.
 
+// ═══════════════════════════════════════════════════════
+//  TAB / PANEL SCAFFOLDING
+// ═══════════════════════════════════════════════════════
 function buildActionTabs(){
   const wrap = document.getElementById('actionTabs');
-  const keys = ['sale', ...Object.keys(ACTIONS)];
+  const keys = Object.keys(ACTIONS);
   wrap.innerHTML = keys.map((key,i)=>
-    '<div class="action-tab'+(i===0?' active':'')+'" id="tab-'+key+'" onclick="switchAction(\''+key+'\')">'+(key==='sale'?'Sale':ACTIONS[key].label)+'</div>'
+    '<div class="action-tab'+(i===0?' active':'')+'" id="tab-'+key+'" onclick="switchAction(\''+key+'\')">'+ACTIONS[key].label+'</div>'
   ).join('');
-  buildSalePanel();
-  Object.keys(ACTIONS).forEach(key=>buildPanel(key));
-  switchAction('sale');
-}
-
-// ═══════════════════════════════════════════════════════
-//  SALE — cart-based bulk sale. Pick items (kit / 50ml+scent / vial+scent),
-//  qty + amount, add to cart, repeat, submit once. Linked by a shared
-//  reference_id server-side so the whole sale traces as one event.
-// ═══════════════════════════════════════════════════════
-let saleCart = [];
-
-function buildSalePanel(){
-  const panelsWrap = document.getElementById('panels');
-  const panel = document.createElement('div');
-  panel.className = 'panel';
-  panel.id = 'panel-sale';
-  panel.innerHTML = `
-    <span class="sl">Item type</span>
-    <div class="chip-row" id="saleSkuRow">
-      <div class="chip" data-val="DS" onclick="pickSaleSku(this)">Discovery Set</div>
-      <div class="chip" data-val="50ML" onclick="pickSaleSku(this)">50ml</div>
-      <div class="chip" data-val="VIAL" onclick="pickSaleSku(this)">Loose vial</div>
-    </div>
-    <div id="saleScentWrap" style="display:none;">
-      <span class="sl">Scent</span>
-      <div class="frag-grid" id="saleScentGrid">${SCENTS.map(s=>'<div class="frag-btn" data-val="'+s+'" onclick="pickSaleScent(this)"><div class="frag-dot" style="background:'+SCENT_COLORS[s]+'"></div><div class="frag-lbl">'+s.split(' ')[0]+'<br>'+s.split(' ').slice(1).join(' ')+'</div></div>').join('')}</div>
-    </div>
-    <span class="sl">Quantity</span>
-    <div class="stepper"><button onclick="stepSaleQty(-1)">−</button><input type="number" min="1" value="1" id="saleQtyInput"><button onclick="stepSaleQty(1)">+</button></div>
-    <span class="sl">Amount for this line (Rs)</span>
-    <input class="cust-input" type="number" min="0" id="saleAmountInput" placeholder="0">
-    <button class="stock-btn" style="width:100%;padding:10px;" onclick="addToSaleCart()">+ Add to Cart</button>
-    <hr class="div">
-    <span class="sl">Cart</span>
-    <div id="saleCartBox" style="border:1px solid var(--border);border-radius:8px;padding:2px 10px;">
-      <div class="status-bar dim" style="padding:8px 0;">Cart is empty</div>
-    </div>
-  `;
-  panelsWrap.appendChild(panel);
-}
-
-function pickSaleSku(el){
-  document.querySelectorAll('#saleSkuRow .chip').forEach(c=>c.classList.remove('sel'));
-  el.classList.add('sel');
-  document.getElementById('saleScentWrap').style.display = (el.dataset.val==='50ML'||el.dataset.val==='VIAL') ? 'block' : 'none';
-  document.querySelectorAll('#saleScentGrid .frag-btn').forEach(c=>c.classList.remove('sel'));
-}
-function pickSaleScent(el){
-  document.querySelectorAll('#saleScentGrid .frag-btn').forEach(c=>c.classList.remove('sel'));
-  el.classList.add('sel');
-}
-function stepSaleQty(delta){
-  const inp = document.getElementById('saleQtyInput');
-  inp.value = Math.max(1, (parseInt(inp.value)||1) + delta);
-}
-
-function addToSaleCart(){
-  const skuEl = document.querySelector('#saleSkuRow .chip.sel');
-  if(!skuEl){ alert('Pick an item type first.'); return; }
-  const sku = skuEl.dataset.val;
-  let variant = '';
-  if(sku === '50ML' || sku === 'VIAL'){
-    const scentEl = document.querySelector('#saleScentGrid .frag-btn.sel');
-    if(!scentEl){ alert('Pick a scent first.'); return; }
-    variant = scentEl.dataset.val;
-  }
-  const qty = parseInt(document.getElementById('saleQtyInput').value) || 1;
-  const amount = Number(document.getElementById('saleAmountInput').value) || 0;
-  saleCart.push({ sku, variant, qty, amount });
-  document.getElementById('saleAmountInput').value = '';
-  document.getElementById('saleQtyInput').value = '1';
-  renderSaleCart();
-  checkSubmitReady();
-}
-
-function removeSaleCartLine(idx){
-  saleCart.splice(idx,1);
-  renderSaleCart();
-  checkSubmitReady();
-}
-
-function renderSaleCart(){
-  const box = document.getElementById('saleCartBox');
-  if(!saleCart.length){ box.innerHTML = '<div class="status-bar dim" style="padding:8px 0;">Cart is empty</div>'; return; }
-  let html = '';
-  let total = 0;
-  saleCart.forEach((line, idx)=>{
-    const name = line.sku === 'DS' ? 'Discovery Set' : (line.sku === '50ML' ? '50ml — '+line.variant : 'Vial — '+line.variant);
-    total += line.amount;
-    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid var(--border);gap:8px;">'
-      + '<div style="flex:1;font-size:12px;">'+name+' <span style="color:var(--muted);">×'+line.qty+'</span></div>'
-      + '<div style="font-size:11px;color:var(--muted);">₹'+line.amount+'</div>'
-      + '<button onclick="removeSaleCartLine('+idx+')" style="width:auto;background:transparent;border:none;color:var(--red);font-size:16px;cursor:pointer;">✕</button>'
-      + '</div>';
+  keys.forEach(key=>{
+    if(ACTIONS[key].skus) buildCartPanel(key);
+    else buildSimplePanel(key);
   });
-  html += '<div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border);font-family:\'Bebas Neue\',sans-serif;font-size:16px;"><span>Total</span><span>₹'+total+'</span></div>';
-  box.innerHTML = html;
-}
-
-async function submitSale(){
-  const btn = document.getElementById('submitBtn');
-  btn.disabled = true; btn.textContent = 'SAVING…';
-  const payload = { action: 'bulkSale', user_id: currentUser.user_id, params: { locationType: locType, location: locValue, lines: saleCart } };
-  try{
-    await fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body: JSON.stringify(payload) });
-    showSuccess('SALE<br>LOGGED ✓');
-    saleCart = [];
-    renderSaleCart();
-  }catch(e){
-    queuePending(payload);
-    showSuccess('SAVED<br>OFFLINE ⚠', ()=>{ document.getElementById('actionStatus').textContent='No connection — saved on this device, will sync automatically.'; document.getElementById('actionStatus').className='status-bar warn'; });
-    saleCart = [];
-    renderSaleCart();
-  }
-  btn.textContent = 'Submit';
-  checkSubmitReady();
-}
-
-function warehouseFieldHtml(field, label){
-  return '<span class="sl">'+label+'</span>'
-    + '<input class="cust-input" data-field="'+field+'" placeholder="Type warehouse name" oninput="checkSubmitReady()">'
-    + '<div class="chip-row warehouse-suggest-row" data-for-field="'+field+'" style="margin-top:-4px;"></div>';
-}
-
-function renderWarehouseSuggestChips(){
-  document.querySelectorAll('.warehouse-suggest-row').forEach(row=>{
-    const field = row.dataset.forField;
-    row.innerHTML = WAREHOUSE_SUGGESTIONS.map(w=>'<div class="chip" onclick="fillWarehouseField(this,\''+field+'\',\''+w.replace(/'/g,"\\'")+'\')">'+w+'</div>').join('')
-      + '<div class="chip" style="color:var(--gold);" onclick="promptAddWarehouse(\''+field+'\')">+ New</div>';
-  });
-  const locWrap = document.getElementById('warehouseSuggestChips');
-  if(locWrap){
-    locWrap.innerHTML = WAREHOUSE_SUGGESTIONS.map(w=>'<div class="chip" onclick="fillLocWarehouse(\''+w.replace(/'/g,"\\'")+'\')">'+w+'</div>').join('')
-      + '<div class="chip" style="color:var(--gold);" onclick="promptAddWarehouseLoc()">+ New</div>';
-  }
-}
-
-async function loadWarehouseSuggestions(){
-  try{
-    const res = await fetch(SCRIPT_URL+'?action=getWarehouses');
-    const json = await res.json();
-    if(json.ok) WAREHOUSE_SUGGESTIONS = json.data;
-  }catch(e){}
-  renderWarehouseSuggestChips();
-}
-
-function fillWarehouseField(el, field, value){
-  const panel = el.closest('.panel');
-  panel.querySelector('input[data-field="'+field+'"]').value = value;
-  checkSubmitReady();
-}
-
-async function promptAddWarehouse(field){
-  const name = prompt('New warehouse name:');
-  if(!name || !name.trim()) return;
-  await sendAddWarehouse(name.trim());
-  const panel = event.target.closest('.panel');
-  panel.querySelector('input[data-field="'+field+'"]').value = name.trim();
-  checkSubmitReady();
-}
-async function promptAddWarehouseLoc(){
-  const name = prompt('New warehouse name:');
-  if(!name || !name.trim()) return;
-  await sendAddWarehouse(name.trim());
-  fillLocWarehouse(name.trim());
-}
-async function sendAddWarehouse(name){
-  if(!currentUser){ alert('Pick a user (Login) first.'); return; }
-  try{
-    await fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'},
-      body: JSON.stringify({ action:'addWarehouse', user_id:currentUser.user_id, params:{ name: name } }) });
-  }catch(e){}
-  WAREHOUSE_SUGGESTIONS.push(name);
-  renderWarehouseSuggestChips();
-}
-
-function buildPanel(key){
-  const a = ACTIONS[key];
-  const panelsWrap = document.getElementById('panels');
-  const panel = document.createElement('div');
-  panel.className = 'panel';
-  panel.id = 'panel-' + key;
-
-  let html = '';
-  if(a.needsSku){
-    html += '<span class="sl">SKU</span><div class="chip-row" data-field="sku">'
-      + '<div class="chip" data-val="DS" onclick="pickChip(this)">Discovery Set</div>'
-      + '<div class="chip" data-val="50ML" onclick="pickChip(this)">50ml</div></div>';
-    html += '<div data-scent-wrap style="display:none;"><span class="sl">Scent</span><div class="frag-grid" data-field="variant">'
-      + SCENTS.map(s=>'<div class="frag-btn" data-val="'+s+'" onclick="pickChip(this)"><div class="frag-dot" style="background:'+SCENT_COLORS[s]+'"></div><div class="frag-lbl">'+s.split(' ')[0]+'<br>'+s.split(' ').slice(1).join(' ')+'</div></div>').join('')
-      + '</div></div>';
-  }
-  if(a.needsScent){
-    html += '<span class="sl">Scent</span><div class="frag-grid" data-field="scent">'
-      + SCENTS.map(s=>'<div class="frag-btn" data-val="'+s+'" onclick="pickChip(this)"><div class="frag-dot" style="background:'+SCENT_COLORS[s]+'"></div><div class="frag-lbl">'+s.split(' ')[0]+'<br>'+s.split(' ').slice(1).join(' ')+'</div></div>').join('')
-      + '</div>';
-  }
-  if(a.needsWarehouseOnly){
-    html += warehouseFieldHtml('warehouse','Warehouse');
-  }
-  if(a.needsWarehouseAndEvent){
-    html += warehouseFieldHtml('warehouse','Warehouse');
-    html += '<span class="sl">Event ID</span><input class="cust-input" data-field="eventId" placeholder="FEST-2026-08-22-Andheri" oninput="checkSubmitReady()">';
-  }
-  if(a.needsTwoWarehouses){
-    html += warehouseFieldHtml('fromWarehouse','From warehouse');
-    html += warehouseFieldHtml('toWarehouse','To warehouse');
-  }
-  if(a.needsQty){
-    html += '<span class="sl">Quantity</span><div class="stepper" data-field-stepper="qty">'
-      + '<button onclick="stepQty(this,-1)">−</button><input type="number" min="0" value="1" data-field="qty"><button onclick="stepQty(this,1)">+</button></div>';
-  }
-  if(a.needsTargetQty){
-    html += '<span class="sl">Actual quantity on hand right now</span><input class="cust-input" type="number" min="0" data-field="targetQty" placeholder="0" oninput="checkSubmitReady()">';
-  }
-  if(a.needsAmount){
-    html += '<span class="sl">Amount (Rs)</span><input class="cust-input" type="number" min="0" data-field="amount" placeholder="0" oninput="checkSubmitReady()">';
-  }
-  if(a.needsDsPrice){
-    html += '<span class="sl">Discovery Set price (Rs)</span><input class="cust-input" type="number" min="0" data-field="dsPrice" placeholder="500" oninput="checkSubmitReady()">';
-  }
-  if(a.needsReason){
-    html += '<span class="sl">Reason</span><div class="chip-row" data-field="reasonCode">'
-      + ['leak','damaged','low-fill','other'].map(r=>'<div class="chip" data-val="'+r+'" onclick="pickChip(this)">'+r+'</div>').join('') + '</div>';
-  }
-  if(a.needsSetQC){
-    // Break Set IS the QC. You check vials on paper as you go through the day,
-    // then enter the tally here in one batch: how many sets you broke, and
-    // per scent how many came out accept vs reject.
-    html += '<span class="sl">Sets broken today (from your tally)</span><div class="stepper" data-field-stepper="setsBroken">'
-      + '<button onclick="stepQty(this,-1)">−</button><input type="number" min="0" value="1" data-field="setsBroken" oninput="checkSubmitReady()"><button onclick="stepQty(this,1)">+</button></div>';
-    html += '<span class="sl">Per scent — accept / reject count</span>';
-    html += '<div data-field="scentCounts">' + SCENTS.map(s=>
-      '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border);">'
-      + '<div style="display:flex;align-items:center;gap:6px;width:76px;flex-shrink:0;"><div class="frag-dot" style="width:14px;height:14px;margin:0;background:'+SCENT_COLORS[s]+'"></div><span style="font-size:10px;color:var(--muted);">'+s.split(' ')[0]+'</span></div>'
-      + '<div style="flex:1;"><span class="sl" style="margin:0;">Accept</span><input class="cust-input" type="number" min="0" value="0" data-scent="'+s+'" data-kind="accept" oninput="checkSubmitReady()"></div>'
-      + '<div style="flex:1;"><span class="sl" style="margin:0;">Reject</span><input class="cust-input" type="number" min="0" value="0" data-scent="'+s+'" data-kind="reject" oninput="checkSubmitReady()"></div>'
-      + '</div>'
-    ).join('') + '</div>';
-  }
-
-  panel.innerHTML = html;
-  panelsWrap.appendChild(panel);
-
-  if(a.needsSku){
-    const skuWrap = panel.querySelector('[data-field="sku"]');
-    const scentWrap = panel.querySelector('[data-scent-wrap]');
-    skuWrap.querySelectorAll('.chip').forEach(c=>c.addEventListener('click', ()=>{
-      scentWrap.style.display = c.dataset.val === '50ML' ? 'block' : 'none';
-      checkSubmitReady();
-    }));
-  }
-}
-
-function pickSetDecision(el){
-  const row = el.parentElement;
-  row.querySelectorAll('.chip').forEach(c=>c.classList.remove('sel'));
-  el.classList.add('sel');
-  checkSubmitReady();
-}
-
-function pickChip(el){
-  const row = el.parentElement;
-  row.querySelectorAll('.chip,.frag-btn').forEach(c=>c.classList.remove('sel'));
-  el.classList.add('sel');
-  checkSubmitReady();
-}
-function stepQty(btn, delta){
-  const input = btn.parentElement.querySelector('input');
-  const v = Math.max(0, (parseInt(input.value)||0) + delta);
-  input.value = v;
-  checkSubmitReady();
+  switchAction(keys[0]);
 }
 
 function switchAction(key){
@@ -452,125 +182,309 @@ function switchAction(key){
   document.getElementById('tab-'+key).classList.add('active');
   document.getElementById('panel-'+key).classList.add('active');
   document.getElementById('actionStatus').textContent = '';
-  document.getElementById('submitBtn').textContent = key === 'sale' ? 'Submit Sale' : 'Submit';
-  checkSubmitReady();
+  checkReady();
 }
 
-function pickLocType(el){
-  document.querySelectorAll('#locTypeRow .chip').forEach(c=>c.classList.remove('sel'));
+// ═══════════════════════════════════════════════════════
+//  LOCATION FIELDS — warehouseFieldHtml (free text + suggestions) is used
+//  by warehouseOnly / warehouseAndEvent / twoWarehouses. genericLocationHtml
+//  (Warehouse-or-Event choice) is used by everything else that needs ONE
+//  location. Each panel gets exactly one of these — never both.
+// ═══════════════════════════════════════════════════════
+function warehouseFieldHtml(field, label){
+  return '<span class="sl">'+label+'</span>'
+    + '<input class="cust-input" data-field="'+field+'" placeholder="Type warehouse name" oninput="checkReady()">'
+    + '<div class="chip-row warehouse-suggest-row" data-for-field="'+field+'" style="margin-top:-4px;margin-bottom:8px;"></div>';
+}
+
+function genericLocationHtml(){
+  return '<span class="sl">Location</span>'
+    + '<div class="chip-row" data-locmode-row>'
+      + '<div class="chip" data-val="warehouse" onclick="pickGenericLocType(this)">Warehouse</div>'
+      + '<div class="chip" data-val="event" onclick="pickGenericLocType(this)">Fest / event</div>'
+    + '</div>'
+    + '<input class="cust-input" data-field="genWarehouse" placeholder="Type warehouse name" style="display:none;" oninput="checkReady()">'
+    + '<div class="chip-row warehouse-suggest-row" data-for-field="genWarehouse" style="display:none;margin-top:-4px;margin-bottom:8px;"></div>'
+    + '<input class="cust-input" data-field="genEvent" placeholder="Event ID e.g. FEST-2026-08-22-Andheri" style="display:none;" oninput="checkReady()">';
+}
+
+function pickGenericLocType(el){
+  const panel = el.closest('.panel');
+  panel.querySelectorAll('[data-locmode-row] .chip').forEach(c=>c.classList.remove('sel'));
   el.classList.add('sel');
-  locType = el.dataset.val;
-  locValue = null;
-  document.getElementById('warehouseInput').style.display = locType === 'warehouse' ? 'block' : 'none';
-  document.getElementById('warehouseSuggestChips').style.display = locType === 'warehouse' ? 'flex' : 'none';
-  document.getElementById('eventIdInput').style.display = locType === 'event' ? 'block' : 'none';
-  document.getElementById('warehouseInput').value = '';
-  document.getElementById('eventIdInput').value = '';
-  updateLocStatus();
-  checkSubmitReady();
-}
-function onWarehouseLocChange(){
-  locValue = document.getElementById('warehouseInput').value.trim();
-  updateLocStatus();
-  checkSubmitReady();
-}
-function fillLocWarehouse(value){
-  document.getElementById('warehouseInput').value = value;
-  onWarehouseLocChange();
-}
-function onLocationValueChange(){
-  locValue = document.getElementById('eventIdInput').value.trim();
-  updateLocStatus();
-  checkSubmitReady();
-}
-function updateLocStatus(){
-  const el = document.getElementById('locStatus');
-  if(locType && locValue){ el.textContent = 'Working at: ' + locValue + ' (' + locType + ')'; el.className='status-bar ok'; }
-  else { el.textContent = 'Pick a location before doing anything'; el.className='status-bar dim'; }
+  const isWh = el.dataset.val === 'warehouse';
+  panel.querySelector('[data-field="genWarehouse"]').style.display = isWh ? 'block' : 'none';
+  panel.querySelector('.warehouse-suggest-row[data-for-field="genWarehouse"]').style.display = isWh ? 'flex' : 'none';
+  panel.querySelector('[data-field="genEvent"]').style.display = isWh ? 'none' : 'block';
+  checkReady();
 }
 
-function checkSubmitReady(){
+function readGenericLocation(panel){
+  const sel = panel.querySelector('[data-locmode-row] .chip.sel');
+  if(!sel) return null;
+  const locationType = sel.dataset.val;
+  const location = locationType === 'warehouse'
+    ? panel.querySelector('[data-field="genWarehouse"]').value.trim()
+    : panel.querySelector('[data-field="genEvent"]').value.trim();
+  if(!location) return null;
+  return { locationType, location };
+}
+
+function renderWarehouseSuggestChips(){
+  document.querySelectorAll('.warehouse-suggest-row').forEach(row=>{
+    const field = row.dataset.forField;
+    row.innerHTML = WAREHOUSE_SUGGESTIONS.map(w=>'<div class="chip" onclick="fillWarehouseField(this,\''+field+'\',\''+w.replace(/'/g,"\\'")+'\')">'+w+'</div>').join('')
+      + '<div class="chip" style="color:var(--gold);" onclick="promptAddWarehouse(this,\''+field+'\')">+ New</div>';
+  });
+}
+async function loadWarehouseSuggestions(){
+  try{
+    const res = await fetch(SCRIPT_URL+'?action=getWarehouses');
+    const json = await res.json();
+    if(json.ok) WAREHOUSE_SUGGESTIONS = json.data;
+  }catch(e){}
+  renderWarehouseSuggestChips();
+}
+function fillWarehouseField(el, field, value){
+  const panel = el.closest('.panel');
+  panel.querySelector('input[data-field="'+field+'"]').value = value;
+  checkReady();
+}
+async function promptAddWarehouse(el, field){
+  const name = prompt('New warehouse name:');
+  if(!name || !name.trim()) return;
+  if(!currentUser){ alert('Pick a user (Login) first.'); return; }
+  try{
+    await fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({ action:'addWarehouse', user_id:currentUser.user_id, params:{ name: name.trim() } }) });
+  }catch(e){}
+  WAREHOUSE_SUGGESTIONS.push(name.trim());
+  renderWarehouseSuggestChips();
+  fillWarehouseField(el, field, name.trim());
+}
+
+// ═══════════════════════════════════════════════════════
+//  CART PANELS — Sale, Receive, Opening stock, Transfer, Outward, Inward.
+//  Pick an item + qty, add to cart, repeat, submit the whole cart once.
+// ═══════════════════════════════════════════════════════
+const SKU_LABELS = { DS:'Discovery Set', '50ML':'50ml', VIAL:'Loose vial' };
+
+function buildCartPanel(key){
+  const a = ACTIONS[key];
+  carts[key] = [];
+  const panel = document.createElement('div');
+  panel.className = 'panel';
+  panel.id = 'panel-' + key;
+
+  let locHtml = '';
+  if(a.locMode === 'warehouseOnly') locHtml = warehouseFieldHtml('warehouse','Warehouse');
+  else if(a.locMode === 'warehouseAndEvent') locHtml = warehouseFieldHtml('warehouse','Warehouse') + '<span class="sl">Event ID</span><input class="cust-input" data-field="eventId" placeholder="FEST-2026-08-22-Andheri" oninput="checkReady()">';
+  else if(a.locMode === 'twoWarehouses') locHtml = warehouseFieldHtml('fromWarehouse','From warehouse') + warehouseFieldHtml('toWarehouse','To warehouse');
+  else if(a.locMode === 'generic') locHtml = genericLocationHtml();
+
+  const skuChips = a.skus.map(s=>'<div class="chip" data-val="'+s+'" onclick="pickCartSku(\''+key+'\',this)">'+SKU_LABELS[s]+'</div>').join('');
+  const scentChips = SCENTS.map(s=>'<div class="frag-btn" data-val="'+s+'" onclick="pickCartScent(\''+key+'\',this)"><div class="frag-dot" style="background:'+SCENT_COLORS[s]+'"></div><div class="frag-lbl">'+s.split(' ')[0]+'<br>'+s.split(' ').slice(1).join(' ')+'</div></div>').join('');
+
+  panel.innerHTML = locHtml
+    + '<hr class="div" style="margin:4px 0 8px;">'
+    + '<span class="sl">Item type</span><div class="chip-row" data-cart-sku-row style="margin-bottom:8px;">'+skuChips+'</div>'
+    + '<div data-cart-scent-wrap style="display:none;"><span class="sl">Scent</span><div class="frag-grid" data-cart-scent-grid>'+scentChips+'</div></div>'
+    + '<span class="sl">'+(a.valueLabel||'Quantity')+'</span><input class="cust-input" type="number" min="0" data-cart-value placeholder="0">'
+    + (a.hasAmount ? '<span class="sl">Amount for this line (Rs)</span><input class="cust-input" type="number" min="0" data-cart-amount placeholder="0">' : '')
+    + '<button class="stock-btn" style="width:100%;padding:10px;margin-bottom:8px;" onclick="addCartLine(\''+key+'\')">+ Add to cart</button>'
+    + '<hr class="div" style="margin-bottom:8px;">'
+    + '<span class="sl">Items in this entry</span>'
+    + '<div id="cartBox-'+key+'" style="border:1px solid var(--border);border-radius:8px;padding:2px 10px;"><div class="status-bar dim" style="padding:8px 0;">Nothing added yet</div></div>';
+
+  document.getElementById('panels').appendChild(panel);
+}
+
+function pickCartSku(key, el){
+  const panel = document.getElementById('panel-'+key);
+  panel.querySelectorAll('[data-cart-sku-row] .chip').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  const needsScent = el.dataset.val === '50ML' || el.dataset.val === 'VIAL';
+  panel.querySelector('[data-cart-scent-wrap]').style.display = needsScent ? 'block' : 'none';
+  panel.querySelectorAll('[data-cart-scent-grid] .frag-btn').forEach(c=>c.classList.remove('sel'));
+}
+function pickCartScent(key, el){
+  const panel = document.getElementById('panel-'+key);
+  panel.querySelectorAll('[data-cart-scent-grid] .frag-btn').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+function addCartLine(key){
+  const panel = document.getElementById('panel-'+key);
+  const a = ACTIONS[key];
+  const skuEl = panel.querySelector('[data-cart-sku-row] .chip.sel');
+  if(!skuEl){ alert('Pick an item type first.'); return; }
+  const sku = skuEl.dataset.val;
+  let variant = '';
+  if(sku === '50ML' || sku === 'VIAL'){
+    const scentEl = panel.querySelector('[data-cart-scent-grid] .frag-btn.sel');
+    if(!scentEl){ alert('Pick a scent first.'); return; }
+    variant = scentEl.dataset.val;
+  }
+  const valueInput = panel.querySelector('[data-cart-value]');
+  if(valueInput.value === '' || Number(valueInput.value) < 0){ alert('Enter a quantity.'); return; }
+  const value = Number(valueInput.value);
+  const amountInput = panel.querySelector('[data-cart-amount]');
+  const line = { sku: sku, variant: variant };
+  line[a.valueKey] = value;
+  if(a.hasAmount) line.amount = amountInput ? (Number(amountInput.value) || 0) : 0;
+  carts[key].push(line);
+
+  valueInput.value = '';
+  if(amountInput) amountInput.value = '';
+  renderCart(key);
+  checkReady();
+}
+function removeCartLine(key, idx){
+  carts[key].splice(idx,1);
+  renderCart(key);
+  checkReady();
+}
+function renderCart(key){
+  const box = document.getElementById('cartBox-'+key);
+  const lines = carts[key];
+  if(!lines.length){ box.innerHTML = '<div class="status-bar dim" style="padding:8px 0;">Nothing added yet</div>'; return; }
+  const a = ACTIONS[key];
+  let html = '';
+  lines.forEach((line, idx)=>{
+    const name = SKU_LABELS[line.sku] + (line.variant ? ' — '+line.variant : '');
+    const val = line[a.valueKey];
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid var(--border);gap:8px;">'
+      + '<div style="flex:1;font-size:12px;">'+name+' <span style="color:var(--muted);">×'+val+'</span></div>'
+      + (a.hasAmount ? '<div style="font-size:11px;color:var(--muted);">₹'+(line.amount||0)+'</div>' : '')
+      + '<button onclick="removeCartLine(\''+key+'\','+idx+')" style="width:auto;background:transparent;border:none;color:var(--red);font-size:16px;cursor:pointer;">✕</button>'
+      + '</div>';
+  });
+  box.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════
+//  SIMPLE / SPECIAL PANELS — Break Set (bulk QC), Give Free, Write Off,
+//  Reassemble, Book Pool. One-shot forms, not carts.
+// ═══════════════════════════════════════════════════════
+function buildSimplePanel(key){
+  const a = ACTIONS[key];
+  const panel = document.createElement('div');
+  panel.className = 'panel';
+  panel.id = 'panel-' + key;
+
+  let html = a.locMode === 'generic' ? genericLocationHtml() : '';
+  html += '<hr class="div" style="margin:4px 0 8px;">';
+
+  if(a.special === 'setQC'){
+    html += '<span class="sl">Sets broken today (from your tally)</span><div class="stepper" data-field-stepper="setsBroken">'
+      + '<button onclick="stepGeneric(this,-1)">−</button><input type="number" min="0" value="1" data-field="setsBroken" oninput="checkReady()"><button onclick="stepGeneric(this,1)">+</button></div>';
+    html += '<span class="sl">Per scent — accept / reject count</span>';
+    html += SCENTS.map(s=>
+      '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border);">'
+      + '<div style="display:flex;align-items:center;gap:6px;width:76px;flex-shrink:0;"><div class="frag-dot" style="width:14px;height:14px;margin:0;background:'+SCENT_COLORS[s]+'"></div><span style="font-size:10px;color:var(--muted);">'+s.split(' ')[0]+'</span></div>'
+      + '<div style="flex:1;"><span class="sl" style="margin:0;">Accept</span><input class="cust-input" type="number" min="0" value="0" data-scent="'+s+'" data-kind="accept" oninput="checkReady()"></div>'
+      + '<div style="flex:1;"><span class="sl" style="margin:0;">Reject</span><input class="cust-input" type="number" min="0" value="0" data-scent="'+s+'" data-kind="reject" oninput="checkReady()"></div>'
+      + '</div>'
+    ).join('');
+  } else if(a.simple){
+    if(a.needsScent){
+      html += '<span class="sl">Scent</span><div class="frag-grid" data-field="scent">'
+        + SCENTS.map(s=>'<div class="frag-btn" data-val="'+s+'" onclick="pickSimpleChip(this)"><div class="frag-dot" style="background:'+SCENT_COLORS[s]+'"></div><div class="frag-lbl">'+s.split(' ')[0]+'<br>'+s.split(' ').slice(1).join(' ')+'</div></div>').join('')
+        + '</div>';
+    }
+    if(a.needsQty){
+      html += '<span class="sl">Quantity</span><div class="stepper"><button onclick="stepGeneric(this,-1)">−</button><input type="number" min="0" value="1" data-field="qty" oninput="checkReady()"><button onclick="stepGeneric(this,1)">+</button></div>';
+    }
+    if(a.needsReason){
+      html += '<span class="sl">Reason</span><div class="chip-row" data-field="reasonCode">'
+        + ['leak','damaged','low-fill','other'].map(r=>'<div class="chip" data-val="'+r+'" onclick="pickSimpleChip(this)">'+r+'</div>').join('') + '</div>';
+    }
+    if(a.needsDsPrice){
+      html += '<span class="sl">Discovery Set price (Rs)</span><input class="cust-input" type="number" min="0" data-field="dsPrice" placeholder="500" oninput="checkReady()">';
+    }
+  }
+
+  panel.innerHTML = html;
+  document.getElementById('panels').appendChild(panel);
+}
+
+function pickSimpleChip(el){
+  const row = el.parentElement;
+  row.querySelectorAll('.chip,.frag-btn').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  checkReady();
+}
+function stepGeneric(btn, delta){
+  const input = btn.parentElement.querySelector('input');
+  input.value = Math.max(0, (parseInt(input.value)||0) + delta);
+  checkReady();
+}
+
+// ═══════════════════════════════════════════════════════
+//  READY CHECK / SUBMIT — one dispatcher for every action type
+// ═══════════════════════════════════════════════════════
+function checkReady(){
   const btn = document.getElementById('submitBtn');
-  if(!currentUser || !locType || !locValue || !currentAction){ btn.disabled = true; return; }
-  if(currentAction === 'sale'){ btn.disabled = saleCart.length === 0; return; }
-  const panel = document.getElementById('panel-'+currentAction);
+  if(!currentUser || !currentAction){ btn.disabled = true; return; }
   const a = ACTIONS[currentAction];
+  const panel = document.getElementById('panel-'+currentAction);
   let ready = true;
 
-  if(a.needsSku){
-    const sku = panel.querySelector('[data-field="sku"] .chip.sel');
-    if(!sku) ready = false;
-    else if(sku.dataset.val === '50ML' && !panel.querySelector('[data-field="variant"] .frag-btn.sel')) ready = false;
-  }
-  if(a.needsScent && !panel.querySelector('[data-field="scent"] .frag-btn.sel')) ready = false;
-  if(a.needsWarehouseOnly && !panel.querySelector('input[data-field="warehouse"]').value.trim()) ready = false;
-  if(a.needsWarehouseAndEvent){
-    if(!panel.querySelector('input[data-field="warehouse"]').value.trim()) ready = false;
+  if(a.locMode === 'warehouseOnly'){
+    if(!panel.querySelector('[data-field="warehouse"]').value.trim()) ready = false;
+  } else if(a.locMode === 'warehouseAndEvent'){
+    if(!panel.querySelector('[data-field="warehouse"]').value.trim()) ready = false;
     if(!panel.querySelector('[data-field="eventId"]').value.trim()) ready = false;
-  }
-  if(a.needsTwoWarehouses){
-    const from = panel.querySelector('input[data-field="fromWarehouse"]').value.trim();
-    const to = panel.querySelector('input[data-field="toWarehouse"]').value.trim();
+  } else if(a.locMode === 'twoWarehouses'){
+    const from = panel.querySelector('[data-field="fromWarehouse"]').value.trim();
+    const to = panel.querySelector('[data-field="toWarehouse"]').value.trim();
     if(!from || !to || from === to) ready = false;
+  } else if(a.locMode === 'generic'){
+    if(!readGenericLocation(panel)) ready = false;
   }
-  if(a.needsQty && !(parseInt(panel.querySelector('[data-field="qty"]').value) > 0)) ready = false;
-  if(a.needsTargetQty){
-    const v = panel.querySelector('[data-field="targetQty"]').value;
-    if(v === '' || Number(v) < 0) ready = false;
-  }
-  if(a.needsAmount){
-    const v = panel.querySelector('[data-field="amount"]').value;
-    if(v === '' || Number(v) < 0) ready = false;
-  }
-  if(a.needsDsPrice){
-    const v = panel.querySelector('[data-field="dsPrice"]').value;
-    if(!v || Number(v) <= 0) ready = false;
-  }
-  if(a.needsReason && !panel.querySelector('[data-field="reasonCode"] .chip.sel')) ready = false;
-  if(a.needsSetQC){
+
+  if(a.skus){
+    if(!carts[currentAction] || carts[currentAction].length === 0) ready = false;
+  } else if(a.special === 'setQC'){
     const setsBroken = parseInt(panel.querySelector('[data-field="setsBroken"]').value);
     if(!(setsBroken > 0)) ready = false;
+  } else if(a.simple){
+    if(a.needsScent && !panel.querySelector('[data-field="scent"] .frag-btn.sel')) ready = false;
+    if(a.needsQty && !(parseInt(panel.querySelector('[data-field="qty"]').value) > 0)) ready = false;
+    if(a.needsReason && !panel.querySelector('[data-field="reasonCode"] .chip.sel')) ready = false;
+    if(a.needsDsPrice){
+      const v = panel.querySelector('[data-field="dsPrice"]').value;
+      if(!v || Number(v) <= 0) ready = false;
+    }
   }
 
-  document.getElementById('submitBtn').disabled = !ready;
-}
-
-function readFieldValue(panel, field){
-  const chipSel = panel.querySelector('[data-field="'+field+'"] .chip.sel, [data-field="'+field+'"] .frag-btn.sel');
-  if(chipSel) return chipSel.dataset.val;
-  const input = panel.querySelector('input[data-field="'+field+'"]');
-  if(input) return input.value.trim();
-  return null;
+  btn.disabled = !ready;
 }
 
 async function submitCurrentAction(){
-  if(currentAction === 'sale'){ return submitSale(); }
   const a = ACTIONS[currentAction];
   const panel = document.getElementById('panel-'+currentAction);
   const btn = document.getElementById('submitBtn');
   btn.disabled = true; btn.textContent = 'SAVING…';
 
   const params = {};
-  if(a.needsSku){
-    params.sku = readFieldValue(panel,'sku');
-    params.variant = params.sku === '50ML' ? readFieldValue(panel,'variant') : '';
+  if(a.locMode === 'warehouseOnly'){
+    params.warehouse = panel.querySelector('[data-field="warehouse"]').value.trim();
+  } else if(a.locMode === 'warehouseAndEvent'){
+    params.warehouse = panel.querySelector('[data-field="warehouse"]').value.trim();
+    params.eventId = panel.querySelector('[data-field="eventId"]').value.trim();
+  } else if(a.locMode === 'twoWarehouses'){
+    params.fromWarehouse = panel.querySelector('[data-field="fromWarehouse"]').value.trim();
+    params.toWarehouse = panel.querySelector('[data-field="toWarehouse"]').value.trim();
+  } else if(a.locMode === 'generic'){
+    const loc = readGenericLocation(panel);
+    params.locationType = loc.locationType;
+    params.location = loc.location;
   }
-  if(a.needsScent) params.scent = readFieldValue(panel,'scent');
-  if(a.needsWarehouseOnly) params.warehouse = readFieldValue(panel,'warehouse');
-  if(a.needsWarehouseAndEvent){
-    params.warehouse = readFieldValue(panel,'warehouse');
-    params.eventId = readFieldValue(panel,'eventId');
-  }
-  if(a.needsTwoWarehouses){
-    params.fromWarehouse = readFieldValue(panel,'fromWarehouse');
-    params.toWarehouse = readFieldValue(panel,'toWarehouse');
-  }
-  if(a.needsQty) params.qty = readFieldValue(panel,'qty');
-  if(a.needsTargetQty) params.targetQty = readFieldValue(panel,'targetQty');
-  if(a.needsAmount) params.amount = readFieldValue(panel,'amount');
-  if(a.needsDsPrice) params.dsPrice = readFieldValue(panel,'dsPrice');
-  if(a.needsReason) params.reasonCode = readFieldValue(panel,'reasonCode');
-  if(a.needsSetQC){
+
+  if(a.skus){
+    params.lines = carts[currentAction];
+  } else if(a.special === 'setQC'){
     params.setsBroken = panel.querySelector('[data-field="setsBroken"]').value;
     const counts = {};
     SCENTS.forEach(s=>{
@@ -579,11 +493,11 @@ async function submitCurrentAction(){
       counts[s] = { accept: Number(acc)||0, reject: Number(rej)||0 };
     });
     params.scentCounts = counts;
-  }
-
-  if(!a.needsWarehouseOnly && !a.needsWarehouseAndEvent && !a.needsTwoWarehouses){
-    params.locationType = locType;
-    params.location = locValue;
+  } else if(a.simple){
+    if(a.needsScent) params.scent = panel.querySelector('[data-field="scent"] .frag-btn.sel').dataset.val;
+    if(a.needsQty) params.qty = panel.querySelector('[data-field="qty"]').value;
+    if(a.needsReason) params.reasonCode = panel.querySelector('[data-field="reasonCode"] .chip.sel').dataset.val;
+    if(a.needsDsPrice) params.dsPrice = panel.querySelector('[data-field="dsPrice"]').value;
   }
 
   const payload = { action: a.apiAction, user_id: currentUser.user_id, params: params };
@@ -591,26 +505,37 @@ async function submitCurrentAction(){
   try{
     await fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body: JSON.stringify(payload) });
     showSuccess(a.label.toUpperCase()+'<br>LOGGED ✓');
-    resetPanel(panel, a);
   }catch(e){
     queuePending(payload);
     showSuccess('SAVED<br>OFFLINE ⚠', ()=>{ document.getElementById('actionStatus').textContent='No connection — saved on this device, will sync automatically.'; document.getElementById('actionStatus').className='status-bar warn'; });
   }
+  resetActionPanel(currentAction);
   btn.textContent = 'Submit';
-  checkSubmitReady();
+  checkReady();
 }
 
-function resetPanel(panel, a){
-  panel.querySelectorAll('.chip.sel,.frag-btn.sel').forEach(c=>c.classList.remove('sel'));
-  panel.querySelectorAll('input[type="text"],input[type="number"]').forEach(i=>{
-    if(i.dataset.field === 'qty') i.value = '1'; else i.value = '';
-  });
-  const scentWrap = panel.querySelector('[data-scent-wrap]');
-  if(scentWrap) scentWrap.style.display = 'none';
+function resetActionPanel(key){
+  const a = ACTIONS[key];
+  const panel = document.getElementById('panel-'+key);
+  if(a.skus){ carts[key] = []; renderCart(key); }
+  if(a.special === 'setQC'){
+    panel.querySelector('[data-field="setsBroken"]').value = '1';
+    SCENTS.forEach(s=>{
+      panel.querySelector('[data-scent="'+s+'"][data-kind="accept"]').value = '0';
+      panel.querySelector('[data-scent="'+s+'"][data-kind="reject"]').value = '0';
+    });
+  }
+  if(a.simple){
+    if(a.needsScent) panel.querySelectorAll('[data-field="scent"] .frag-btn').forEach(c=>c.classList.remove('sel'));
+    if(a.needsQty) panel.querySelector('[data-field="qty"]').value = '1';
+    if(a.needsReason) panel.querySelectorAll('[data-field="reasonCode"] .chip').forEach(c=>c.classList.remove('sel'));
+    if(a.needsDsPrice) panel.querySelector('[data-field="dsPrice"]').value = '';
+  }
 }
 
-function updateSetQCReady(){ checkSubmitReady(); }
-
+// ═══════════════════════════════════════════════════════
+//  PENDING QUEUE — local backup for failed POSTs, auto-retried
+// ═══════════════════════════════════════════════════════
 function getPendingQueue(){ try{ return JSON.parse(localStorage.getItem(PENDING_KEY)||'[]'); }catch(e){ return []; } }
 function setPendingQueue(q){ localStorage.setItem(PENDING_KEY, JSON.stringify(q)); updateSyncBadge(); }
 function queuePending(payload){ const q=getPendingQueue(); q.push({payload:payload, queuedAt:new Date().toISOString()}); setPendingQueue(q); }
@@ -641,6 +566,9 @@ function showSuccess(label, afterFn){
 }
 function warmup(){ fetch(SCRIPT_URL+'?action=ping',{mode:'no-cors'}).catch(()=>{}); }
 
+// ═══════════════════════════════════════════════════════
+//  USER LOGIN — tap a name, enter PIN, verified server-side before login
+// ═══════════════════════════════════════════════════════
 function openUserOverlay(){ document.getElementById('userOverlay').classList.add('open'); loadUsers(); }
 function closeUserOverlay(){ document.getElementById('userOverlay').classList.remove('open'); }
 
@@ -652,7 +580,7 @@ async function loadUsers(){
     const json = await res.json();
     if(!json.ok) throw new Error(json.error);
     el.innerHTML = json.data.map(u=>
-      '<div class="user-row'+(currentUser && currentUser.user_id===u.user_id?' sel':'')+'" onclick=\'selectUser('+JSON.stringify(u)+')\'>'
+      '<div class="user-row'+(currentUser && currentUser.user_id===u.user_id?' sel':'')+'" onclick=\'promptLogin('+JSON.stringify(u)+')\'>'
       + '<div><div class="user-name">'+u.name+'</div><div class="user-role">'+u.role+'</div></div>'
       + (currentUser && currentUser.user_id===u.user_id ? '<span style="color:var(--green)">✓</span>' : '')
       + '</div>'
@@ -661,14 +589,32 @@ async function loadUsers(){
     el.innerHTML = '<div class="status-bar err">Could not load users — check the Web App URL is set. '+e.message+'</div>';
   }
 }
+function promptLogin(u){
+  const pin = prompt('Enter PIN for ' + u.name + ':');
+  if(pin === null) return;
+  verifyAndLogin(u.user_id, pin);
+}
+async function verifyAndLogin(userId, pin){
+  try{
+    const res = await fetch(SCRIPT_URL+'?action=verifyLogin&user_id='+encodeURIComponent(userId)+'&pin='+encodeURIComponent(pin));
+    const json = await res.json();
+    if(!json.ok) throw new Error(json.error);
+    selectUser(json.data);
+  }catch(e){
+    alert('Login failed: ' + e.message);
+  }
+}
 function selectUser(u){
   currentUser = u;
   localStorage.setItem(USER_KEY, JSON.stringify(u));
   document.getElementById('userBtn').textContent = '👤 ' + u.name;
   closeUserOverlay();
-  checkSubmitReady();
+  checkReady();
 }
 
+// ═══════════════════════════════════════════════════════
+//  STOCK SUMMARY — read-only live view
+// ═══════════════════════════════════════════════════════
 function openStockOverlay(){ document.getElementById('stockOverlay').classList.add('open'); loadStockSummary(); }
 function closeStockOverlay(){ document.getElementById('stockOverlay').classList.remove('open'); }
 
@@ -691,6 +637,9 @@ async function loadStockSummary(){
   }
 }
 
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
 buildActionTabs();
 loadWarehouseSuggestions();
 warmup();
@@ -700,7 +649,7 @@ try{
   const saved = JSON.parse(localStorage.getItem(USER_KEY)||'null');
   if(saved){ currentUser = saved; document.getElementById('userBtn').textContent = '👤 ' + saved.name; }
 }catch(e){}
-checkSubmitReady();
+checkReady();
 </script>
 </body>
 </html>
