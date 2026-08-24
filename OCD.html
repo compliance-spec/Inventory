@@ -122,7 +122,7 @@ th{color:var(--muted);font-weight:500;font-size:10px;text-transform:uppercase;}
 </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbya3DCbhegmcoOLEMIPHIRTrEDAVSSOjATtT0IIqCFigYUAM7NZ7paUxWLnlMdSLcN7xw/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzNxBI2y8uy50iIwbqFxYrkgH5B5CBCj_ov3Pfmnz1INyeb-j7pGvb2QQbez_Lyoa-Arg/exec';
 
 const SCENTS = ['Skinny Dip','Midnight Snack','About Last Night','Freshly Picked','Still Not Over It'];
 const SCENT_COLORS = {
@@ -150,8 +150,8 @@ const ACTIONS = {
   receive:   { label:'Receive',       apiAction:'bulkReceiveProcurement', locMode:'warehouseOnly',     skus:['DS','50ML'], valueKey:'qty' },
   opening:   { label:'Opening stock', apiAction:'bulkSetOpeningStock',    locMode:'warehouseOnly',     skus:['DS','50ML'], valueKey:'targetQty', valueLabel:'Actual qty on hand' },
   transfer:  { label:'Transfer',      apiAction:'bulkInternalTransfer',   locMode:'twoWarehouses',     skus:['DS','50ML'], valueKey:'qty' },
-  outward:   { label:'Outward',       apiAction:'bulkOutwardToFest',      locMode:'warehouseAndEvent', skus:['DS','50ML'], valueKey:'qty' },
-  inward:    { label:'Inward',        apiAction:'bulkInwardFromFest',     locMode:'warehouseAndEvent', skus:['DS','50ML'], valueKey:'qty' },
+  outward:   { label:'Outward',       apiAction:'bulkOutwardToFest',      locMode:'warehouseAndEvent', skus:['DS','50ML','VIAL'], valueKey:'qty' },
+  inward:    { label:'Inward',        apiAction:'bulkInwardFromFest',     locMode:'warehouseAndEvent', skus:['DS','50ML','VIAL'], valueKey:'qty' },
   breakSet:  { label:'Break set',     apiAction:'breakSet',               locMode:'generic',           special:'setQC' },
   giveFree:  { label:'Give free',     apiAction:'giveVialFree',           locMode:'generic',           simple:true, needsScent:true, needsQty:true },
   writeOff:  { label:'Write off',     apiAction:'writeOffVial',           locMode:'generic',           simple:true, needsScent:true, needsQty:true, needsReason:true },
@@ -626,11 +626,36 @@ async function loadStockSummary(){
     const json = await res.json();
     if(!json.ok) throw new Error(json.error);
     if(!json.data.length){ el.innerHTML = '<div class="status-bar dim">No stock recorded yet.</div>'; return; }
-    let html = '<table><tr><th>SKU</th><th>Variant</th><th>Location</th><th>Status</th><th>Qty</th></tr>';
+
+    // Group by location so it reads as "what's at Bhiwandi / FEST-X / etc"
+    // instead of one long flat list mixing every location together.
+    const groups = {};
     json.data.forEach(r=>{
-      html += '<tr><td>'+r.sku+'</td><td>'+(r.variant||'-')+'</td><td>'+r.location+'</td><td>'+r.status+'</td><td>'+r.qty+'</td></tr>';
+      const key = r.location_type + '|' + r.location;
+      if(!groups[key]) groups[key] = { locationType: r.location_type, location: r.location, rows: [] };
+      groups[key].rows.push(r);
     });
-    html += '</table>';
+
+    const sortedKeys = Object.keys(groups).sort((a,b)=>{
+      const ga = groups[a], gb = groups[b];
+      if(ga.locationType !== gb.locationType) return ga.locationType === 'warehouse' ? -1 : 1;
+      return ga.location.localeCompare(gb.location);
+    });
+
+    let html = '';
+    sortedKeys.forEach(key=>{
+      const g = groups[key];
+      const tag = g.locationType === 'warehouse' ? 'Warehouse' : 'Fest / event';
+      html += '<div style="margin-top:14px;margin-bottom:6px;">'
+        + '<span style="font-family:\'Bebas Neue\',sans-serif;font-size:15px;letter-spacing:0.04em;">'+g.location+'</span>'
+        + ' <span style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;">'+tag+'</span>'
+        + '</div>';
+      html += '<table><tr><th>SKU</th><th>Variant</th><th>Status</th><th>Qty</th></tr>';
+      g.rows.forEach(r=>{
+        html += '<tr><td>'+r.sku+'</td><td>'+(r.variant||'-')+'</td><td>'+r.status+'</td><td>'+r.qty+'</td></tr>';
+      });
+      html += '</table>';
+    });
     el.innerHTML = html;
   }catch(e){
     el.innerHTML = '<div class="status-bar err">Could not load. '+e.message+'</div>';
