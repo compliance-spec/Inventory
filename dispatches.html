@@ -66,12 +66,6 @@
     font-size:13.5px; font-weight:600; cursor:pointer; text-align:center;
     text-decoration:none; display:flex; align-items:center; justify-content:center; gap:6px;
   }
-  .btn-icon{
-    flex-shrink:0; width:44px; border-radius:9px; border:1px solid var(--brand);
-    background:var(--brand-ink); color:var(--brand);
-    display:flex; align-items:center; justify-content:center; text-decoration:none;
-  }
-  .btn-icon.off{border-color:var(--line); color:var(--ink-soft); background:var(--card); opacity:.5; pointer-events:none;}
   .btn.dispatched{background:var(--go); color:#fff;}
   .btn.pending{background:#fff; color:var(--ink-soft); border:1px solid var(--line);}
 
@@ -135,7 +129,6 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbyYNKV77IUzU1xtxP3qG6FT
 let currentAsm = localStorage.getItem('dispatchAsmName') || '';
 let orders = [];
 let activeDistributor = 'All';
-const phoneIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>';
 
 function daysPending(orderDate){
   const d = new Date(orderDate);
@@ -240,7 +233,6 @@ function render(){
     const days = daysPending(o['Order Date']);
     const card = document.createElement('div');
     card.className = 'card';
-    const phone = (o['Phone'] || '').toString().replace(/[^0-9+]/g,'');
     card.innerHTML = `
       <div class="card-top">
         <div>
@@ -251,9 +243,6 @@ function render(){
       </div>
       ${o['Order Value'] ? `<div class="value">₹${escapeHtml(String(o['Order Value']))}</div>` : ''}
       <div class="actions">
-        ${phone
-          ? `<a class="btn-icon" href="tel:${phone}" aria-label="Call ${escapeHtml(o['Distributor']||'distributor')}">${phoneIcon}</a>`
-          : `<div class="btn-icon off" aria-label="No phone number saved">${phoneIcon}</div>`}
         <button class="btn dispatched" onclick="openConfirm(this)">Dispatched</button>
         <button class="btn pending" onclick="markPending(${o._row}, this)">Still pending</button>
       </div>
